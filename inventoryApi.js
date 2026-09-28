@@ -24,8 +24,34 @@ app.get("/", (req, resp) => {
   resp.send("<h1>Hello From Main</h1>");
 });
 app.get("/Products", (req, resp) => {
-  const { page = 1, limit = 10 } = req.query;
-  const data = Array.from(inventory.values());
+  let data = Array.from(inventory.values());
+  const { page = 1, limit = 10, search, category, stock } = req.query;
+  if (search) {
+    data = data.filter((item) =>
+      item.title.toLowerCase().includes(search.toLowerCase()),
+    );
+  }
+  if (category) {
+    data = data.filter((item) => {
+      return item.category.toLowerCase() === category.toLowerCase();
+    });
+  }
+  if (stock === "high") {
+    data = data.filter((item) => {
+      return item.stock > 20;
+    });
+  }
+  if (stock === "low") {
+    data = data.filter((item) => {
+      return item.stock < 20;
+    });
+  }
+  if (stock === "out") {
+    data = data.filter((item) => {
+      return item.stock === 0;
+    });
+  }
+
   const start = (page - 1) * limit;
   const result = data.slice(start, start + Number(limit));
   //   resp.json(data);
